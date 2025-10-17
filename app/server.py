@@ -4,6 +4,22 @@ from . import utils
 
 app = Flask(__name__)
 
+
+@app.after_request
+def add_csp_header(response):
+    """
+    Add a basic Content-Security-Policy header to HTML responses to disallow
+    inline scripts/styles and reduce XSS impact.
+    """
+    # Only add the header for HTML responses to avoid interfering with JSON API
+    ctype = response.content_type or ""
+    if ctype.startswith("text/html"):
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';"
+        )
+    return response
+
 @app.route("/")
 def index():
     # simple HTML form for manual testing
@@ -73,8 +89,8 @@ def item_endpoint(key):
 @app.route("/vulnerable_echo")
 def vulnerable_echo():
     name = request.args.get("name", "")
-    # WARNING: raw insertion - this is intentionally vulnerable for the exercise
-    html = f"<h2>Hello {name}</h2>"
+    # Mitigation: escape user input so it is not reflected raw into HTML
+    html = f"<h2>Hello {escape(name)}</h2>"
     return html, 200, {"Content-Type": "text/html; charset=utf-8"}
 
 # "Safe" echo uses escaping

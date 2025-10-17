@@ -1,3 +1,12 @@
 venv/
 __pycache__
-.pytest_cache
+.pytest_cache# virtualenvs
+venv/
+venv_ci/
+env/
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+.idea/
